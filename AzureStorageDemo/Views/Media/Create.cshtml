@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Upload New Media";
+}
+
+<h2>Upload New Media</h2>
+
+<form asp-action="Create" enctype="multipart/form-data" method="post">
+    <div class="form-group">
+        <label>Select file to upload</label>
+        <input type="file" name="file" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success mt-2">Upload</button>
+    <a asp-action="Index" class="btn btn-secondary mt-2">Back to Media</a>
+</form>

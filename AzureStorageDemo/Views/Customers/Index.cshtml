@@ -1,0 +1,25 @@
+﻿@model IEnumerable<AzureStorageDemo.Models.CustomerEntity>
+
+<h2>Customers</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Add Customer</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var customer in Model)
+        {
+            <tr>
+                <td>@customer.Name</td>
+                <td>@customer.Email</td>
+                <td>@customer.Phone</td>
+            </tr>
+        }
+    </tbody>
+</table>

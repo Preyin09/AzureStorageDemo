@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Azure Storage Demo";
+}
+<h2>Azure Storage Demo</h2>
+<ul>
+    <li><a asp-controller="Customers" asp-action="Index">Customers (Azure Tables)</a></li>
+    <li><a asp-controller="Products" asp-action="Index">Products (Azure Tables)</a></li>
+    <li><a asp-controller="Media" asp-action="Index">Media (Azure Blob Storage)</a></li>
+    <li><a asp-controller="Contracts" asp-action="Index">Contracts (Azure Files)</a></li>
+</ul>
+<p>This app writes queue messages on create/upload actions (Azure Queues).</p>

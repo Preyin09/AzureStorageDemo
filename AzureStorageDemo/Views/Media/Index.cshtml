@@ -1,0 +1,30 @@
+﻿@model List<AzureStorageDemo.Models.FileItemDto>
+
+<h2>Media Files</h2>
+
+<form asp-action="Upload" asp-controller="Media" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" />
+    <button type="submit">Upload</button>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Size (bytes)</th>
+            <th>Type</th>
+            <th>Link</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var file in Model)
+        {
+            <tr>
+                <td>@file.Name</td>
+                <td>@file.Size</td>
+                <td>@file.ContentType</td>
+                <td><a href="@file.Url" target="_blank">View</a></td>
+            </tr>
+        }
+    </tbody>
+</table>

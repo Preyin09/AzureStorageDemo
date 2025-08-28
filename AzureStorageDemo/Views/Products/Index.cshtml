@@ -1,0 +1,25 @@
+﻿@model IEnumerable<AzureStorageDemo.Models.ProductEntity>
+
+<h2>Products</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Add Product</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ProductName</th>
+            <th>Description</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.ProductName</td>
+                <td>@product.Description</td>
+                <td>@product.Price.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
