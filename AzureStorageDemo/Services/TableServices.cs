@@ -1,92 +1,47 @@
-﻿using Azure;
-using Azure.Data.Tables;
+﻿using Azure.Data.Tables;
 using AzureStorageDemo.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AzureStorageDemo.Services
 {
     public class TableServices : ITableServices
     {
         private readonly TableServiceClient _tableServiceClient;
-        private readonly string _customersTableName = "Customers";
-        private readonly string _productsTableName = "Products";
+        private readonly TableClient _customerTable;
+        private readonly TableClient _productTable;
 
         public TableServices(TableServiceClient tableServiceClient)
         {
             _tableServiceClient = tableServiceClient;
-        }
-
-        // ------------------- Customers -------------------
-        public async Task<List<CustomerEntity>> ListCustomersAsync()
-        {
-            var tableClient = _tableServiceClient.GetTableClient(_customersTableName);
-            await tableClient.CreateIfNotExistsAsync();
-
-            var results = new List<CustomerEntity>();
-            await foreach (var entity in tableClient.QueryAsync<TableEntity>())
-            {
-                results.Add(new CustomerEntity
-                {
-                    PartitionKey = entity.PartitionKey,
-                    RowKey = entity.RowKey,
-                    Name = entity.GetString("Name"),
-                    Email = entity.GetString("Email"),
-                    Phone = entity.GetString("Phone")
-                });
-            }
-
-            return results;
+            _customerTable = _tableServiceClient.GetTableClient("Customers");
+            _customerTable.CreateIfNotExists();
+            _productTable = _tableServiceClient.GetTableClient("Products");
+            _productTable.CreateIfNotExists();
         }
 
         public async Task AddCustomerAsync(CustomerEntity customer)
         {
-            var tableClient = _tableServiceClient.GetTableClient(_customersTableName);
-            await tableClient.CreateIfNotExistsAsync();
-
-            var tableEntity = new TableEntity(customer.PartitionKey, customer.RowKey)
-            {
-                { "Name", customer.Name },
-                { "Email", customer.Email },
-                { "Phone", customer.Phone }
-            };
-
-            await tableClient.AddEntityAsync(tableEntity);
+            await _customerTable.AddEntityAsync(customer);
         }
 
-        // ------------------- Products -------------------
-        public async Task<List<ProductEntity>> ListProductsAsync(string partitionKey = "General")
+        public async Task<List<CustomerEntity>> ListCustomersAsync()
         {
-            var tableClient = _tableServiceClient.GetTableClient(_productsTableName);
-            await tableClient.CreateIfNotExistsAsync();
-
-            var results = new List<ProductEntity>();
-            await foreach (var entity in tableClient.QueryAsync<TableEntity>(e => e.PartitionKey == partitionKey))
-            {
-                results.Add(new ProductEntity
-                {
-                    PartitionKey = entity.PartitionKey,
-                    RowKey = entity.RowKey,
-                    ProductName = entity.GetString("Name"),
-                    Description = entity.GetString("Description"),
-                    Price = entity.GetDouble("Price") ?? 0
-                });
-            }
-
-            return results;
+            var entities = _customerTable.Query<CustomerEntity>().ToList();
+            return entities;
         }
 
         public async Task AddProductAsync(ProductEntity product)
         {
-            var tableClient = _tableServiceClient.GetTableClient(_productsTableName);
-            await tableClient.CreateIfNotExistsAsync();
+            await _productTable.AddEntityAsync(product);
+        }
 
-            var tableEntity = new TableEntity(product.PartitionKey, product.RowKey)
-            {
-                { "Name", product.ProductName },
-                { "Description", product.Description },
-                { "Price", product.Price }
-            };
-
-            await tableClient.AddEntityAsync(tableEntity);
+        public async Task<List<ProductEntity>> ListProductsAsync()
+        {
+            var entities = _productTable.Query<ProductEntity>().ToList();
+            return entities;
         }
     }
 }

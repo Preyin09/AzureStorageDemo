@@ -1,11 +1,12 @@
 ﻿using AzureStorageDemo.Models;
-using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AzureStorageDemo.Services
 {
     public interface IFileShareServices
     {
-        Task<List<FileItemDto>> ListFilesAsync(string shareName, string directoryName = "");
-        Task<string> UploadFileAsync(IFormFile file, string shareName, string directoryName = "");
+        Task<List<FileItemDto>> ListFilesAsync(string shareName, string directoryName);
+        Task UploadFileAsync(string shareName, string directoryName, string fileName, byte[] fileContent);
     }
 }

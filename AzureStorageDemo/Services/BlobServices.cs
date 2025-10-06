@@ -1,7 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using AzureStorageDemo.Models;
-using Microsoft.AspNetCore.Http;
 
 namespace AzureStorageDemo.Services
 {
@@ -14,42 +13,41 @@ namespace AzureStorageDemo.Services
             _blobServiceClient = blobServiceClient;
         }
 
+        // Ensure container exists
+        public async Task EnsureContainerExistsAsync(string containerName)
+        {
+            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+            await containerClient.CreateIfNotExistsAsync();
+        }
+
+        // List all blobs
         public async Task<List<FileItemDto>> ListFilesAsync(string containerName)
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
-
-            // Create container if it doesn't exist
             await containerClient.CreateIfNotExistsAsync();
 
-            var items = new List<FileItemDto>();
-
+            var files = new List<FileItemDto>();
             await foreach (var blob in containerClient.GetBlobsAsync())
             {
-                items.Add(new FileItemDto
+                files.Add(new FileItemDto
                 {
                     Name = blob.Name,
-                    Url = containerClient.GetBlobClient(blob.Name).Uri.ToString(),
-                    Size = blob.Properties.ContentLength ?? 0,
-                    ContentType = blob.Properties.ContentType
+                    Size = blob.Properties.ContentLength ?? 0
                 });
             }
-
-            return items;
+            return files;
         }
 
-
-        public async Task<string> UploadFileAsync(IFormFile file, string containerName)
+        // Upload file
+        public async Task UploadFileAsync(string containerName, string fileName, byte[] fileContent)
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
             await containerClient.CreateIfNotExistsAsync();
 
-            var fileName = $"{DateTime.Now:yyyyMMdd_HHmmss}_{file.FileName}";
             var blobClient = containerClient.GetBlobClient(fileName);
-
-            using var stream = file.OpenReadStream();
-            await blobClient.UploadAsync(stream, true);
-
-            return blobClient.Uri.ToString();
+            using var ms = new MemoryStream(fileContent);
+            await blobClient.UploadAsync(ms, overwrite: true);
         }
     }
 }
+

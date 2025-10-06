@@ -1,15 +1,14 @@
 ﻿using AzureStorageDemo.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace AzureStorageDemo.Services
 {
     public interface ITableServices
     {
-        // Customers
-        Task<List<CustomerEntity>> ListCustomersAsync();
         Task AddCustomerAsync(CustomerEntity customer);
-
-        // Products
-        Task<List<ProductEntity>> ListProductsAsync(string partitionKey = "General");
+        Task<List<CustomerEntity>> ListCustomersAsync();
         Task AddProductAsync(ProductEntity product);
+        Task<List<ProductEntity>> ListProductsAsync();
     }
 }

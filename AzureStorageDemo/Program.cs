@@ -1,43 +1,34 @@
-﻿using Azure.Data.Tables;
-using Azure.Storage.Blobs;
-using Azure.Storage.Queues;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Files.Shares;
+using Azure.Storage.Queues;
+using Azure.Data.Tables;
 using AzureStorageDemo.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+// Azure configuration from appsettings.json
+string blobConn = builder.Configuration["Azure:BlobStorageConnectionString"];
+string queueConn = builder.Configuration["Azure:QueueStorageConnectionString"];
+string tableConn = builder.Configuration["Azure:TableStorageConnectionString"];
+string fileConn = builder.Configuration["Azure:FileShareConnectionString"];
 
-// Azure Storage connection string
-var connectionString = builder.Configuration.GetConnectionString("AzureStorage");
-
-// Register Azure clients
-builder.Services.AddSingleton(new TableServiceClient(connectionString));
-builder.Services.AddSingleton(new BlobServiceClient(connectionString));
-builder.Services.AddSingleton(new QueueServiceClient(connectionString));
-builder.Services.AddSingleton(new ShareServiceClient(connectionString));
-
-// Register custom services
-builder.Services.AddScoped<ITableServices, TableServices>();
+// Register services
 builder.Services.AddScoped<IBlobServices, BlobServices>();
 builder.Services.AddScoped<IQueueServices, QueueServices>();
+builder.Services.AddScoped<ITableServices, TableServices>();
 builder.Services.AddScoped<IFileShareServices, FileShareServices>();
 
+// Azure clients
+builder.Services.AddSingleton(new BlobServiceClient(blobConn));
+builder.Services.AddSingleton(new QueueServiceClient(queueConn));
+builder.Services.AddSingleton(new TableServiceClient(tableConn));
+builder.Services.AddSingleton(new ShareServiceClient(fileConn));
+
+builder.Services.AddControllersWithViews();
+
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-}
-
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
+app.MapDefaultControllerRoute();
 app.Run();

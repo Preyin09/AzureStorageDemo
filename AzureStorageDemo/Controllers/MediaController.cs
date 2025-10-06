@@ -1,4 +1,5 @@
-﻿using AzureStorageDemo.Services;
+﻿using AzureStorageDemo.Models;
+using AzureStorageDemo.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AzureStorageDemo.Controllers
@@ -6,7 +7,7 @@ namespace AzureStorageDemo.Controllers
     public class MediaController : Controller
     {
         private readonly IBlobServices _blobServices;
-        private const string ContainerName = "media-files";
+        private readonly string ContainerName = "media"; // matches Azure container
 
         public MediaController(IBlobServices blobServices)
         {
@@ -15,19 +16,21 @@ namespace AzureStorageDemo.Controllers
 
         public async Task<IActionResult> Index()
         {
+            await _blobServices.EnsureContainerExistsAsync(ContainerName);
             var files = await _blobServices.ListFilesAsync(ContainerName);
             return View(files);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<IActionResult> UploadFile(IFormFile file)
         {
             if (file != null && file.Length > 0)
             {
-                await _blobServices.UploadFileAsync(file, ContainerName);
+                using var ms = new MemoryStream();
+                await file.CopyToAsync(ms);
+                await _blobServices.UploadFileAsync(ContainerName, file.FileName, ms.ToArray());
             }
-
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
     }
 }

@@ -1,34 +1,26 @@
 ﻿using AzureStorageDemo.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace AzureStorageDemo.Controllers
 {
     public class ContractsController : Controller
     {
-        private readonly IFileShareServices _fileShareServices;
-        private const string ShareName = "contracts";
-        private const string DirectoryName = "payments";
+        private readonly IFileShareServices _fileShareService;
 
-        public ContractsController(IFileShareServices fileShareServices)
+        public ContractsController(IFileShareServices fileShareService)
         {
-            _fileShareServices = fileShareServices;
+            _fileShareService = fileShareService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var files = await _fileShareServices.ListFilesAsync(ShareName, DirectoryName);
+            string shareName = "contracts";      // replace with your actual share name
+            string directoryName = "documents";  // replace with your actual folder, "" for root
+
+            var files = await _fileShareService.ListFilesAsync(shareName, directoryName);
+
             return View(files);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile file)
-        {
-            if (file != null && file.Length > 0)
-            {
-                await _fileShareServices.UploadFileAsync(file, ShareName, DirectoryName);
-            }
-
-            return RedirectToAction(nameof(Index));
         }
     }
 }
